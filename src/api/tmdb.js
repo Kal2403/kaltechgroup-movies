@@ -96,6 +96,41 @@ export const getMovieDetails = (id) => getMediaDetails('movie', id);
 
 export const getSeriesDetails = (id) => getMediaDetails('tv', id);
 
+export const getMediaVideos = async (mediaType, id) => {
+  try {
+    // Primero intentamos obtener videos en idioma es-ES
+    let response = await tmdbApi.get(`/${mediaType}/${id}/videos`);
+    let videos = response.data?.results || [];
+
+    // Fallback: Si no hay videos en espanol, consultamos en ingles
+    if (videos.length === 0) {
+      const fallbackResponse = await tmdbApi.get(`/${mediaType}/${id}/videos`, {
+        params: { language: 'en-US' },
+      });
+      videos = fallbackResponse.data?.results || [];
+    }
+
+    // Filtrar videos de YouTube
+    const ytVideos = videos.filter((v) => v.site === 'YouTube');
+
+    // Priorizar Trailer oficial, luego cualquier Trailer, luego Teaser, luego el primero disponible
+    const trailer =
+      ytVideos.find((v) => v.type === 'Trailer' && v.official) ||
+      ytVideos.find((v) => v.type === 'Trailer') ||
+      ytVideos.find((v) => v.type === 'Teaser') ||
+      ytVideos[0] ||
+      null;
+
+    return {
+      trailer,
+      allVideos: ytVideos,
+    };
+  } catch (error) {
+    console.error('Error fetching media videos:', error);
+    return { trailer: null, allVideos: [] };
+  }
+};
+
 export const getMoviesNowPlaying = async (page = 1) => {
   try {
     const response = await tmdbApi.get('/movie/now_playing', {

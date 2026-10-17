@@ -24,14 +24,18 @@ const Sidebar = ({ carouselItem, topMovies, topSeries, telegramUrl, contactEmail
       <h2 className="mb-3 text-base font-black">En cartelera</h2>
       <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
         {carouselItem && (
-          <article key={carouselItem.id} className="relative h-72 overflow-hidden sm:h-80 lg:h-80">
+          <Link
+            to={`/peliculas/${carouselItem.id}`}
+            key={carouselItem.id}
+            className="group relative block h-72 overflow-hidden sm:h-80 lg:h-80"
+          >
             <img
               src={imageUrl(carouselItem.poster_path, 'w780') || 'https://placehold.co/520x780/0f172a/94a3b8?text=Sin+poster'}
               alt={getTitle(carouselItem)}
-              className="h-full w-full object-cover transition duration-500"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3">
-              <p className="line-clamp-2 text-sm font-black">{getTitle(carouselItem)}</p>
+              <p className="line-clamp-2 text-sm font-black transition group-hover:text-red-400">{getTitle(carouselItem)}</p>
               <div className="mt-2 flex items-center gap-3 text-xs text-slate-200">
                 <span>{getYear(carouselItem)}</span>
                 <span className="inline-flex items-center gap-1 font-black text-yellow-400">
@@ -39,7 +43,7 @@ const Sidebar = ({ carouselItem, topMovies, topSeries, telegramUrl, contactEmail
                 </span>
               </div>
             </div>
-          </article>
+          </Link>
         )}
       </div>
     </section>

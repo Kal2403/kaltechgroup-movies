@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Film, Play, Star } from 'lucide-react';
 import FavoriteButton from '../components/FavoriteButton';
-import { getMediaDetails } from '../api/tmdb';
+import { getMediaDetails, getMediaVideos } from '../api/tmdb';
 import { useFavorites } from '../hooks/useFavorites';
 import { getRating, getTitle, getYear, imageUrl } from '../utils/media';
 
@@ -21,6 +21,7 @@ const MediaDetailsPage = ({ mediaType }) => {
   const { id } = useParams();
   const config = detailsConfig[mediaType];
   const [item, setItem] = useState(null);
+  const [trailer, setTrailer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -29,14 +30,19 @@ const MediaDetailsPage = ({ mediaType }) => {
   useEffect(() => {
     let isActive = true;
 
-    const loadDetails = async () => {
+    const loadDetailsAndVideos = async () => {
       try {
         setLoading(true);
         setError(null);
-        const details = await getMediaDetails(mediaType, id);
+
+        const [details, videoData] = await Promise.all([
+          getMediaDetails(mediaType, id),
+          getMediaVideos(mediaType, id),
+        ]);
 
         if (isActive) {
           setItem(details);
+          setTrailer(videoData.trailer);
         }
       } catch {
         if (isActive) {
@@ -49,7 +55,7 @@ const MediaDetailsPage = ({ mediaType }) => {
       }
     };
 
-    loadDetails();
+    loadDetailsAndVideos();
 
     return () => {
       isActive = false;
@@ -71,13 +77,14 @@ const MediaDetailsPage = ({ mediaType }) => {
         style={{ backgroundImage: background ? `url(${background})` : undefined }}
         aria-hidden="true"
       />
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-[2px]" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/85 backdrop-blur-[2px]" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Link to={config.backPath} className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-300 transition hover:text-red-400">
           <ArrowLeft size={18} /> Volver
         </Link>
 
+        {/* Ficha principal */}
         <section className="grid gap-8 rounded-xl border border-slate-800 bg-slate-950/80 p-4 shadow-2xl md:grid-cols-[280px_1fr] md:p-6">
           <img
             src={imageUrl(item.poster_path, 'w500') || 'https://placehold.co/500x750/0f172a/94a3b8?text=Sin+poster'}
@@ -144,6 +151,42 @@ const MediaDetailsPage = ({ mediaType }) => {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Seccion de Trailer Oficial */}
+        <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/80 p-4 sm:p-6 shadow-2xl">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+            <h2 className="flex items-center gap-2 text-xl font-black sm:text-2xl">
+              <Film className="text-red-500" size={24} />
+              Tráiler Oficial
+            </h2>
+            {trailer && (
+              <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+                <Play size={12} className="text-red-500" />
+                {trailer.name}
+              </span>
+            )}
+          </div>
+
+          {trailer?.key ? (
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-800 bg-black shadow-2xl">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${trailer.key}?rel=0&modestbranding=1`}
+                title={`Tráiler de ${getTitle(item)}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-900/40 py-12 px-4 text-center">
+              <Film size={36} className="text-slate-600 mb-2" />
+              <p className="text-sm font-semibold text-slate-300">Tráiler no disponible</p>
+              <p className="text-xs text-slate-500 mt-1 max-w-md">
+                No se encontró un tráiler en video disponible para este título en TMDB.
+              </p>
+            </div>
+          )}
         </section>
       </div>
     </main>
