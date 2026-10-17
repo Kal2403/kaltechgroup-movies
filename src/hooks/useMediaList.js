@@ -7,7 +7,7 @@ const initialPagination = {
   totalResults: 0,
 };
 
-export const useMediaList = ({ mediaType = 'movie', query = '' }) => {
+export const useMediaList = ({ mediaType = 'movie', query = '', genreId = null }) => {
   const normalizedQuery = query.trim();
   const [items, setItems] = useState([]);
   const [pagination, setPagination] = useState(initialPagination);
@@ -29,9 +29,9 @@ export const useMediaList = ({ mediaType = 'movie', query = '' }) => {
         };
       }
 
-      return getPopularMedia(mediaType, pageToLoad);
+      return getPopularMedia(mediaType, pageToLoad, genreId);
     },
-    [mediaType, normalizedQuery],
+    [mediaType, normalizedQuery, genreId],
   );
 
   useEffect(() => {

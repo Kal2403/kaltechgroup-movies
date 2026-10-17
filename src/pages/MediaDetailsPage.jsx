@@ -110,9 +110,13 @@ const MediaDetailsPage = ({ mediaType }) => {
             {item.genres?.length > 0 && (
               <div className="mt-5 flex flex-wrap gap-2">
                 {item.genres.map((genre) => (
-                  <span key={genre.id} className="rounded bg-slate-800 px-3 py-1 text-xs font-bold text-slate-200">
+                  <Link
+                    key={genre.id}
+                    to={`/${mediaType === 'tv' ? 'series' : 'peliculas'}?categoria=${genre.id}&nombre=${encodeURIComponent(genre.name)}`}
+                    className="rounded bg-slate-800 px-3 py-1 text-xs font-bold text-slate-200 transition hover:bg-red-600 hover:text-white"
+                  >
                     {genre.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}

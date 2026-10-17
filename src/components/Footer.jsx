@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Mail, Send, Youtube } from 'lucide-react';
 import { siteConfig } from '../config/site';
 import logoKalCineHd from '../assets/logo_kal_cine_hd.png';
@@ -19,27 +20,27 @@ const Footer = () => {
               />
             </div>
             <p className="max-w-sm text-sm leading-6 text-slate-400">
-              Películas, series, estrenos y novedades organizadas para descubrir qué ver en cada momento.
+              Películas, series, categorías y novedades organizadas para descubrir qué ver en cada momento.
             </p>
           </div>
 
           <div>
             <h3 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-200">Explorar</h3>
             <div className="space-y-3 text-sm text-slate-400">
-              <a href="#" className="block transition hover:text-red-400">Películas</a>
-              <a href="#" className="block transition hover:text-red-400">Series</a>
-              <a href="#" className="block transition hover:text-red-400">Estrenos</a>
-              <a href="#" className="block transition hover:text-red-400">Populares</a>
+              <Link to="/peliculas" className="block transition hover:text-red-400">Películas</Link>
+              <Link to="/series" className="block transition hover:text-red-400">Series</Link>
+              <Link to="/favoritos" className="block transition hover:text-red-400">Favoritos</Link>
+              <Link to="/peliculas" className="block transition hover:text-red-400">Populares</Link>
             </div>
           </div>
 
           <div>
             <h3 className="mb-4 text-sm font-black uppercase tracking-wide text-slate-200">Ayuda</h3>
             <div className="space-y-3 text-sm text-slate-400">
-              <a href="#" className="block transition hover:text-red-400">Contacto</a>
-              <a href="#" className="block transition hover:text-red-400">Soporte</a>
-              <a href="#" className="block transition hover:text-red-400">Privacidad</a>
-              <a href="#" className="block transition hover:text-red-400">Términos</a>
+              <span className="block text-slate-500">Contacto</span>
+              <span className="block text-slate-500">Soporte</span>
+              <span className="block text-slate-500">Privacidad</span>
+              <span className="block text-slate-500">Términos</span>
             </div>
           </div>
 

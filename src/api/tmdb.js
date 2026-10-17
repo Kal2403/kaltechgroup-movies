@@ -1,20 +1,22 @@
 import axios from 'axios';
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 
-if (!API_KEY || !BASE_URL) {
-  throw new Error('Faltan Variables de entorno de TMDB')
+if (!API_KEY) {
+  console.warn('Advertencia: Falta la variable de entorno VITE_TMDB_API_KEY. Configurala en tu archivo .env');
 }
 
 const mediaEndpoints = {
   movie: {
     details: (id) => `/movie/${id}`,
     popular: '/movie/popular',
+    discover: '/discover/movie',
   },
   tv: {
     details: (id) => `/tv/${id}`,
     popular: '/tv/popular',
+    discover: '/discover/tv',
   },
 };
 
@@ -33,15 +35,27 @@ const toPaginatedResponse = (data) => ({
   totalResults: data.total_results || 0,
 });
 
-export const getPopularMedia = async (mediaType, page = 1) => {
+export const getPopularMedia = async (mediaType, page = 1, genreId = null) => {
   try {
-    const endpoint = mediaEndpoints[mediaType]?.popular;
+    const config = mediaEndpoints[mediaType];
 
-    if (!endpoint) {
+    if (!config) {
       throw new Error(`Unsupported media type: ${mediaType}`);
     }
 
-    const response = await tmdbApi.get(endpoint, {
+    if (genreId) {
+      const response = await tmdbApi.get(config.discover, {
+        params: {
+          page,
+          with_genres: genreId,
+          sort_by: 'popularity.desc',
+          include_adult: false,
+        },
+      });
+      return toPaginatedResponse(response.data);
+    }
+
+    const response = await tmdbApi.get(config.popular, {
       params: { page },
     });
 
@@ -52,13 +66,13 @@ export const getPopularMedia = async (mediaType, page = 1) => {
   }
 };
 
-export const getPopularMovies = async (page = 1) => {
-  const data = await getPopularMedia('movie', page);
+export const getPopularMovies = async (page = 1, genreId = null) => {
+  const data = await getPopularMedia('movie', page, genreId);
   return data.results;
 };
 
-export const getPopularSeries = async (page = 1) => {
-  const data = await getPopularMedia('tv', page);
+export const getPopularSeries = async (page = 1, genreId = null) => {
+  const data = await getPopularMedia('tv', page, genreId);
   return data.results;
 };
 
