@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Film, Play, Star, Users } from 'lucide-react';
+import { ArrowLeft, Film, Play, Sparkles, Star, Users } from 'lucide-react';
 import FavoriteButton from '../components/FavoriteButton';
-import { getMediaCredits, getMediaDetails, getMediaVideos } from '../api/tmdb';
+import MediaCard from '../components/MediaCard';
+import { getMediaCredits, getMediaDetails, getMediaRecommendations, getMediaVideos } from '../api/tmdb';
 import { useFavorites } from '../hooks/useFavorites';
 import { getRating, getTitle, getYear, imageUrl } from '../utils/media';
 
@@ -23,6 +24,7 @@ const MediaDetailsPage = ({ mediaType }) => {
   const [item, setItem] = useState(null);
   const [trailer, setTrailer] = useState(null);
   const [credits, setCredits] = useState({ cast: [], directors: [] });
+  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -36,16 +38,18 @@ const MediaDetailsPage = ({ mediaType }) => {
         setLoading(true);
         setError(null);
 
-        const [details, videoData, creditsData] = await Promise.all([
+        const [details, videoData, creditsData, recsData] = await Promise.all([
           getMediaDetails(mediaType, id),
           getMediaVideos(mediaType, id),
           getMediaCredits(mediaType, id),
+          getMediaRecommendations(mediaType, id),
         ]);
 
         if (isActive) {
           setItem(details);
           setTrailer(videoData.trailer);
           setCredits(creditsData);
+          setRecommendations(recsData);
         }
       } catch {
         if (isActive) {
@@ -237,6 +241,31 @@ const MediaDetailsPage = ({ mediaType }) => {
             </div>
           )}
         </section>
+
+        {/* Seccion de Titulos Similares / Recomendados */}
+        {recommendations?.length > 0 && (
+          <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/80 p-4 sm:p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <h2 className="flex items-center gap-2 text-xl font-black sm:text-2xl">
+                <Sparkles className="text-red-500" size={24} />
+                También te podría gustar
+              </h2>
+              <span className="text-xs text-slate-400 font-medium">Recomendados</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {recommendations.map((rec) => (
+                <MediaCard
+                  key={rec.id}
+                  item={rec}
+                  mediaType={mediaType}
+                  variant="poster"
+                  favoriteActive={isFavorite(rec.id, mediaType)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
