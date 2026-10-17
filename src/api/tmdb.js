@@ -131,6 +131,43 @@ export const getMediaVideos = async (mediaType, id) => {
   }
 };
 
+export const getMediaCredits = async (mediaType, id) => {
+  try {
+    const response = await tmdbApi.get(`/${mediaType}/${id}/credits`);
+    const cast = response.data?.cast || [];
+    const crew = response.data?.crew || [];
+
+    const directors = crew.filter((member) => member.job === 'Director').map((d) => d.name);
+
+    return {
+      cast: cast.slice(0, 16),
+      directors,
+      crew,
+    };
+  } catch (error) {
+    console.error('Error fetching media credits:', error);
+    return { cast: [], directors: [], crew: [] };
+  }
+};
+
+export const getMediaRecommendations = async (mediaType, id) => {
+  try {
+    let response = await tmdbApi.get(`/${mediaType}/${id}/recommendations`);
+    let results = response.data?.results || [];
+
+    // Fallback a contenido similar si no hay recomendaciones
+    if (results.length === 0) {
+      const fallback = await tmdbApi.get(`/${mediaType}/${id}/similar`);
+      results = fallback.data?.results || [];
+    }
+
+    return results.slice(0, 12);
+  } catch (error) {
+    console.error('Error fetching media recommendations:', error);
+    return [];
+  }
+};
+
 export const getMoviesNowPlaying = async (page = 1) => {
   try {
     const response = await tmdbApi.get('/movie/now_playing', {
