@@ -1,4 +1,5 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import FavoritesPage from './pages/FavoritesPage';
@@ -7,12 +8,11 @@ import MediaDetailsPage from './pages/MediaDetailsPage';
 import MediaListPage from './pages/MediaListPage';
 import NotFound from './pages/NotFound';
 import SearchPage from './pages/SearchPage';
-import { Routes, Route } from 'react-router-dom';
+import { FavoritesProvider } from './context/FavoritesProvider';
 
 const App = () => {
-
     return (
-        <>
+        <FavoritesProvider>
             <NavBar />
             <Routes>
                 <Route path="/" element={<Home />} />
@@ -25,8 +25,8 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />
-        </>
-    )
-}
+        </FavoritesProvider>
+    );
+};
 
 export default App;
