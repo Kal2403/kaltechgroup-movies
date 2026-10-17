@@ -184,11 +184,11 @@ const MediaDetailsPage = ({ mediaType }) => {
               </h2>
               <span className="text-xs text-slate-400 font-medium">{credits.cast.length} actores</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+            <div className="flex gap-3 overflow-x-auto pb-3 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 sm:overflow-visible scrollbar-thin scrollbar-thumb-slate-700">
               {credits.cast.map((actor) => (
                 <div
                   key={actor.id}
-                  className="group rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-center transition hover:border-red-500/60 hover:-translate-y-1"
+                  className="w-28 shrink-0 sm:w-auto group rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-center transition hover:border-red-500/60 hover:-translate-y-1"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-slate-800 mb-2">
                     <img
