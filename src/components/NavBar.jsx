@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import logoKalCineHd from '../assets/logo_kal_cine_hd.png';
 import { MOVIE_CATEGORIES } from '../utils/categories';
+import { useFavorites } from '../hooks/useFavorites';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [categoriesOpenMobile, setCategoriesOpenMobile] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('login');
+    const { favoritesCount } = useFavorites();
 
     const openModal = (type) => {
         setModalType(type);
@@ -52,8 +54,13 @@ const Navbar = () => {
                         <Link to="/series" className="text-gray-300 hover:text-red-500 transition-colors duration-200">
                             Series
                         </Link>
-                        <Link to="/favoritos" className="text-gray-300 hover:text-red-500 transition-colors duration-200">
-                            Favoritos
+                        <Link to="/favoritos" className="text-gray-300 hover:text-red-500 transition-colors duration-200 flex items-center gap-1.5">
+                            <span>Favoritos</span>
+                            {favoritesCount > 0 && (
+                                <span className="inline-flex items-center justify-center bg-red-600 text-white text-[10px] font-black h-4 min-w-4 px-1 rounded-full shadow-sm shadow-red-900/40">
+                                    {favoritesCount}
+                                </span>
+                            )}
                         </Link>
 
                         {/* Desplegable de Categorias Desktop */}
@@ -149,9 +156,14 @@ const Navbar = () => {
                         <Link
                             to="/favoritos"
                             onClick={() => setIsOpen(false)}
-                            className="block py-2 text-base font-medium text-gray-300 hover:text-red-500"
+                            className="flex items-center justify-between py-2 text-base font-medium text-gray-300 hover:text-red-500"
                         >
-                            Favoritos
+                            <span>Favoritos</span>
+                            {favoritesCount > 0 && (
+                                <span className="inline-flex items-center justify-center bg-red-600 text-white text-xs font-black h-5 min-w-5 px-1.5 rounded-full">
+                                    {favoritesCount}
+                                </span>
+                            )}
                         </Link>
 
                         {/* Acordeon de Categorias en Mobile */}
