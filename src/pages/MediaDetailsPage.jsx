@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Film, Play, Star } from 'lucide-react';
+import { ArrowLeft, Film, Play, Star, Users } from 'lucide-react';
 import FavoriteButton from '../components/FavoriteButton';
-import { getMediaDetails, getMediaVideos } from '../api/tmdb';
+import { getMediaCredits, getMediaDetails, getMediaVideos } from '../api/tmdb';
 import { useFavorites } from '../hooks/useFavorites';
 import { getRating, getTitle, getYear, imageUrl } from '../utils/media';
 
@@ -22,6 +22,7 @@ const MediaDetailsPage = ({ mediaType }) => {
   const config = detailsConfig[mediaType];
   const [item, setItem] = useState(null);
   const [trailer, setTrailer] = useState(null);
+  const [credits, setCredits] = useState({ cast: [], directors: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -35,14 +36,16 @@ const MediaDetailsPage = ({ mediaType }) => {
         setLoading(true);
         setError(null);
 
-        const [details, videoData] = await Promise.all([
+        const [details, videoData, creditsData] = await Promise.all([
           getMediaDetails(mediaType, id),
           getMediaVideos(mediaType, id),
+          getMediaCredits(mediaType, id),
         ]);
 
         if (isActive) {
           setItem(details);
           setTrailer(videoData.trailer);
+          setCredits(creditsData);
         }
       } catch {
         if (isActive) {
@@ -137,10 +140,24 @@ const MediaDetailsPage = ({ mediaType }) => {
                 <p className="text-xs font-black uppercase text-slate-500">Titulo original</p>
                 <p className="mt-1 font-bold">{item.original_title || item.original_name || 'N/A'}</p>
               </div>
-              <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
-                <p className="text-xs font-black uppercase text-slate-500">Estado</p>
-                <p className="mt-1 font-bold">{item.status || 'N/A'}</p>
-              </div>
+
+              {credits.directors?.length > 0 ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+                  <p className="text-xs font-black uppercase text-slate-500">Dirección</p>
+                  <p className="mt-1 font-bold">{credits.directors.join(', ')}</p>
+                </div>
+              ) : item.created_by?.length > 0 ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+                  <p className="text-xs font-black uppercase text-slate-500">Creador</p>
+                  <p className="mt-1 font-bold">{item.created_by.map((c) => c.name).join(', ')}</p>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+                  <p className="text-xs font-black uppercase text-slate-500">Estado</p>
+                  <p className="mt-1 font-bold">{item.status || 'N/A'}</p>
+                </div>
+              )}
+
               <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
                 <p className="text-xs font-black uppercase text-slate-500">Popularidad</p>
                 <p className="mt-1 font-bold">{item.popularity?.toFixed?.(1) || 'N/A'}</p>
@@ -152,6 +169,38 @@ const MediaDetailsPage = ({ mediaType }) => {
             </div>
           </div>
         </section>
+
+        {/* Seccion de Reparto Principal */}
+        {credits.cast?.length > 0 && (
+          <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/80 p-4 sm:p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <h2 className="flex items-center gap-2 text-xl font-black sm:text-2xl">
+                <Users className="text-red-500" size={24} />
+                Reparto Principal
+              </h2>
+              <span className="text-xs text-slate-400 font-medium">{credits.cast.length} actores</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+              {credits.cast.map((actor) => (
+                <div
+                  key={actor.id}
+                  className="group rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-center transition hover:border-red-500/60 hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-slate-800 mb-2">
+                    <img
+                      src={imageUrl(actor.profile_path, 'w185') || 'https://placehold.co/185x250/0f172a/94a3b8?text=Sin+foto'}
+                      alt={actor.name}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="line-clamp-1 text-xs font-bold text-white transition group-hover:text-red-400">{actor.name}</p>
+                  <p className="line-clamp-1 text-[11px] text-slate-400 mt-0.5">{actor.character || 'Personaje'}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Seccion de Trailer Oficial */}
         <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/80 p-4 sm:p-6 shadow-2xl">
